@@ -32,6 +32,13 @@ const (
 // A Reader consumes QIF data and returns parsed transactions.
 type Reader interface {
 
+	// ReadAccount functions just like Read but will return an Account. AFAIK
+	// `!Account` metadata comes before the file header so this should be called
+	// before parsing the header. If Account fails to be read you can assume
+	// that no account metadata is present and you can attempt to read the file
+	// again without trying to read the Account.
+	ReadAccount() (Account, error)
+
 	// Read returns the next transaction from the input data. Returns nil if
 	// the end of the input has been reached. If the input ends without a
 	// terminating '^' symbol, the result will be the transaction data read
@@ -71,7 +78,8 @@ func NewReaderWithConfig(r io.Reader, config Config) *reader {
 	}
 }
 
-func (r *reader) parseAccountMetadata() (Account, error) {
+// readAccountMetadata works like Read but is intended to be run before trying to parse the Header
+func (r *reader) ReadAccountMetadata() (Account, error) {
 	tx := &account{}
 	data := false
 

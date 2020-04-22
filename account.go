@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Account contains the fields used for the account metadata block.
 type Account interface {
 	Name() string
 	AccountType() string

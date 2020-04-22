@@ -15,12 +15,13 @@
 package qif
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnexpectedEOF(t *testing.T) {
@@ -140,4 +141,20 @@ func TestSpecExample1(t *testing.T) {
 	txs, err := reader.ReadAll()
 	assert.NoError(t, err)
 	assert.Equal(t, expected, txs)
+}
+
+func TestSpecExample2(t *testing.T) {
+	input, err := os.Open("./testdata/example2.qif")
+	require.NoError(t, err)
+	defer input.Close()
+
+	reader := NewReaderWithConfig(input, Config{DayFirst: true})
+
+	acc, err := reader.ReadAccountMetadata()
+	require.NoError(t, err)
+
+	_, err = reader.ReadAll()
+	require.NoError(t, err)
+
+	assert.Equal(t, &account{name: "0000-1028281", description: "Example Account", accountType: "Bank"}, acc)
 }
