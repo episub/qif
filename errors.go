@@ -30,3 +30,18 @@ type RecordEndError struct {
 func (RecordEndError) Error() string {
 	return fmt.Sprintf("unexpected end of input")
 }
+
+// A AccountRecordEndError is returned if the input data finishes without a terminating
+// '^' character. All records should be terminated in a QIF file, but an
+// application may wish to be forgiving if the last record is not terminated.
+// The non-terminated transaction can be found as a field within the error.
+type AccountRecordEndError struct {
+
+	// Incomplete is the transaction that was being parsed when the input
+	// ended.
+	Incomplete Account
+}
+
+func (AccountRecordEndError) Error() string {
+	return fmt.Sprintf("unexpected end of input")
+}

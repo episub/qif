@@ -15,11 +15,36 @@
 package qif
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"log"
+	"os"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestExample2(t *testing.T ) {
+	file, err := os.Open("./testdata/example2.qif")
+	require.NoError(t, err)
+
+	reader := NewReaderWithConfig(file, Config{DayFirst: true})
+	
+	accountData, err := reader.parseAccountMetadata()
+	require.NoError(t, err)
+	
+	log.Printf("n: %s, t: %s, d: %s", accountData.Name(), accountData.Description(), accountData.AccountType())
+
+	err = reader.parseHeader()
+	require.NoError(t, err)
+
+	transactions, err := reader.ReadAll()
+	require.NoError(t, err)
+
+	for _, transaction := range transactions {
+		log.Printf("m: %s a: %d d: %v", transaction.Memo(), transaction.Amount(), transaction.Date())
+	}
+}
 
 func TestDateParse(t *testing.T) {
 	expectedDate, err := time.Parse("02/01/2006", "01/03/2017")

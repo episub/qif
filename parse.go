@@ -22,10 +22,11 @@ import (
 )
 
 const (
-	bankHeader = "!Type:Bank"
-	cashHeader = "!Type:Cash"
-	cardHeader = "!Type:CCard"
-	recordEnd  = "^"
+	bankHeader    = "!Type:Bank"
+	cashHeader    = "!Type:Cash"
+	cardHeader    = "!Type:CCard"
+	accountHeader = "!Account"
+	recordEnd     = "^"
 )
 
 // A Reader consumes QIF data and returns parsed transactions.
@@ -68,6 +69,32 @@ func NewReaderWithConfig(r io.Reader, config Config) *reader {
 		in:     bufio.NewScanner(r),
 		config: config,
 	}
+}
+
+func (r *reader) parseAccountMetadata() (Account, error) {
+	tx := &account{}
+	data := false
+
+	for r.in.Scan() {
+		data = true
+		line := r.in.Text()
+
+		if line == recordEnd {
+			return tx, nil
+		}
+
+		err := tx.parseAccountField(r.in.Text(), r.config)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	if !data {
+		// EOF
+		return tx, nil
+	}
+
+	return tx, nil
 }
 
 // parseHeader reads the first line of the input and validates the header. An
