@@ -1,4 +1,4 @@
-module github.com/dmjones/qif
+module github.com/episub/qif
 
 go 1.14
 
